@@ -389,11 +389,16 @@ function update(deltaTime) {
     Matter.Engine.update(engine, deltaTime * 1000); // Matter.js expects milliseconds
 
     // Camera follows player
-    if (player.body.position.y < cameraY + canvas.height / 2.5) {
-        cameraY = player.body.position.y - canvas.height / 2.5;
-    } else if (inSafeZone) {
-        // While in the safe zone, allow camera to scroll down, but not below initial ground.
-        cameraY = Math.max(0, player.body.position.y - canvas.height / 2.5);
+    const cameraTopThreshold = cameraY + canvas.height * 0.4; // Top 40%
+    const cameraBottomThreshold = cameraY + canvas.height * 0.75; // Bottom 25%
+
+    if (player.body.position.y < cameraTopThreshold) {
+        // Move camera up when player is near the top
+        cameraY = player.body.position.y - canvas.height * 0.4;
+    } else if (inSafeZone && player.body.position.y > cameraBottomThreshold) {
+        // In safe zone, move camera down if player is near the bottom
+        const targetCameraY = player.body.position.y - canvas.height * 0.75;
+        cameraY = Math.max(0, targetCameraY); // Don't go below the ground
     }
     
     // Update score
