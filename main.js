@@ -388,26 +388,36 @@ function update(deltaTime) {
     // Update engine
     Matter.Engine.update(engine, deltaTime * 1000); // Matter.js expects milliseconds
 
-    // Camera follows player
-    const cameraTopThreshold = cameraY + canvas.height * 0.4; // Top 40%
+    // --- Camera follows player (with smoothing) ---
+    const cameraTopThreshold = cameraY + canvas.height * 0.4;
     const cameraCenter = cameraY + canvas.height * 0.5;
 
+    let targetCameraY = cameraY;
+
     if (player.body.position.y < cameraTopThreshold) {
-        // Move camera up when player is near the top
-        cameraY = player.body.position.y - canvas.height * 0.4;
+        // Target for moving up
+        targetCameraY = player.body.position.y - canvas.height * 0.4;
     } 
     
     if (inSafeZone) {
-        // In safe zone, smoothly follow the player down if they are falling and are below the screen's center
-        // This prevents the camera from 'jolting' down.
+        // In safe zone, if player is falling and below center, target should also follow them down.
         if (player.body.velocity.y > 0 && player.body.position.y > cameraCenter) {
-            const targetCameraY = player.body.position.y - canvas.height * 0.5;
-            cameraY = Math.max(0, targetCameraY); // Don't go below the ground (y=0)
+            targetCameraY = player.body.position.y - canvas.height * 0.5;
         }
-        // Also ensure camera doesn't go below 0 if player is on ground
-        if (player.body.position.y > canvas.height - 100) { // check if player is near ground
-            cameraY = Math.max(0, cameraY);
-        }
+    }
+    
+    // Smoothly interpolate camera position towards the target
+    // Clamp target to not go below ground
+    targetCameraY = Math.max(0, targetCameraY);
+    
+    // The smoothing factor determines how quickly the camera catches up to the target.
+    // A smaller value means slower, smoother movement.
+    const smoothingFactor = 0.08; 
+    cameraY += (targetCameraY - cameraY) * smoothingFactor;
+
+    // Snap to 0 if very close to prevent floating point drift
+    if (Math.abs(cameraY) < 0.1) {
+        cameraY = 0;
     }
     
     // Update score
