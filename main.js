@@ -395,10 +395,18 @@ function update(deltaTime) {
     if (player.body.position.y < cameraTopThreshold) {
         // Move camera up when player is near the top
         cameraY = player.body.position.y - canvas.height * 0.4;
-    } else if (inSafeZone && player.body.position.y > cameraBottomThreshold) {
+    } 
+    
+    if (inSafeZone) {
         // In safe zone, move camera down if player is near the bottom
-        const targetCameraY = player.body.position.y - canvas.height * 0.75;
-        cameraY = Math.max(0, targetCameraY); // Don't go below the ground
+        if (player.body.position.y > cameraBottomThreshold) {
+            const targetCameraY = player.body.position.y - canvas.height * 0.75;
+            cameraY = Math.max(0, targetCameraY); // Don't go below the ground
+        }
+        // Also ensure camera doesn't go below 0 if player is on ground
+        if (player.body.position.y > canvas.height - 100) { // check if player is near ground
+            cameraY = Math.max(0, cameraY);
+        }
     }
     
     // Update score
