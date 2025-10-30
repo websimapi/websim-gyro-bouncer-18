@@ -408,7 +408,7 @@ function update(deltaTime) {
     
     // Smoothly interpolate camera position towards the target
     // Clamp target to not go below ground
-    targetCameraY = Math.max(0, targetCameraY);
+    targetCameraY = Math.min(targetCameraY, 0); // Allow camera to move up (negative Y) but not down past 0.
     
     // The smoothing factor determines how quickly the camera catches up to the target.
     // A smaller value means slower, smoother movement.
