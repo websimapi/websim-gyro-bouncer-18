@@ -28,7 +28,7 @@ const restitution = 3.0; // Bounciness
 let player, platformManager, replay;
 let ground, groundImg;
 let inSafeZone = true;
-const SAFE_ZONE_SCORE = 200;
+const SAFE_ZONE_SCORE = 50;
 
 let cameraY = 0;
 let score = 0;
@@ -391,6 +391,9 @@ function update(deltaTime) {
     // Camera follows player
     if (player.body.position.y < cameraY + canvas.height / 2.5) {
         cameraY = player.body.position.y - canvas.height / 2.5;
+    } else if (inSafeZone) {
+        // While in the safe zone, allow camera to scroll down, but not below initial ground.
+        cameraY = Math.max(0, player.body.position.y - canvas.height / 2.5);
     }
     
     // Update score
