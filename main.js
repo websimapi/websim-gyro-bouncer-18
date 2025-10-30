@@ -390,7 +390,7 @@ function update(deltaTime) {
 
     // Camera follows player
     const cameraTopThreshold = cameraY + canvas.height * 0.4; // Top 40%
-    const cameraBottomThreshold = cameraY + canvas.height * 0.75; // Bottom 25%
+    const cameraCenter = cameraY + canvas.height * 0.5;
 
     if (player.body.position.y < cameraTopThreshold) {
         // Move camera up when player is near the top
@@ -398,10 +398,11 @@ function update(deltaTime) {
     } 
     
     if (inSafeZone) {
-        // In safe zone, move camera down if player is near the bottom
-        if (player.body.position.y > cameraBottomThreshold) {
-            const targetCameraY = player.body.position.y - canvas.height * 0.75;
-            cameraY = Math.max(0, targetCameraY); // Don't go below the ground
+        // In safe zone, smoothly follow the player down if they are falling and are below the screen's center
+        // This prevents the camera from 'jolting' down.
+        if (player.body.velocity.y > 0 && player.body.position.y > cameraCenter) {
+            const targetCameraY = player.body.position.y - canvas.height * 0.5;
+            cameraY = Math.max(0, targetCameraY); // Don't go below the ground (y=0)
         }
         // Also ensure camera doesn't go below 0 if player is on ground
         if (player.body.position.y > canvas.height - 100) { // check if player is near ground
